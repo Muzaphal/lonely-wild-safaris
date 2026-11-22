@@ -117,8 +117,8 @@ export default async function Footer() {
                     <ul className="space-y-3 text-sm text-gray-400">
                         <li className="flex items-center gap-2">
                             <FaPhoneAlt className="text-amber-500" />
-                            <a href="tel:+256700000000" className="hover:text-amber-500">
-                                +256 700 000 000
+                            <a href="tel:+256771222081" className="hover:text-amber-500">
+                                +256 771 222 081
                             </a>
                         </li>
                         <li className="flex items-center gap-2">

@@ -11,6 +11,9 @@ import {
   FaLeaf,
   FaUsers,
   FaTicketAlt,
+  FaStar,
+  FaClock,
+  FaMapMarkerAlt,
 } from 'react-icons/fa';
 import { MdOutlineExplore, MdSecurity } from 'react-icons/md';
 
@@ -21,27 +24,19 @@ import ChatPrompt from '@/components/ChatPrompt';
 
 // ─── Hero carousel images ───
 const heroSlides = [
-  {
-    src: '/images/hero/hero-home.jpg',
-    alt: 'Elephants at sunset on the African savanna',
-  },
-  {
-    src: '/images/hero/hero-2.jpg',
-    alt: 'Mountain gorilla in Bwindi Impenetrable Forest',
-  },
-  {
-    src: '/images/hero/hero-3.jpg',
-    alt: 'Lion pride resting in Queen Elizabeth National Park',
-  },
-  {
-    src: '/images/hero/hero-4.jpg',
-    alt: 'Boat cruise on the Nile near Murchison Falls',
-  },
+  { src: '/images/hero/hero-home.jpg', alt: 'Elephants at sunset on the African savanna' },
+  { src: '/images/hero/hero-2.jpg', alt: 'Mountain gorilla in Bwindi Impenetrable Forest' },
+  { src: '/images/hero/hero-3.jpg', alt: 'Lion pride resting in Queen Elizabeth National Park' },
+  { src: '/images/hero/hero-4.jpg', alt: 'Boat cruise on the Nile near Murchison Falls' },
 ];
 
 export default function Home() {
-  const featured = safaris.slice(0, 3);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Show more safaris in the featured carousel (was 3 → now 8)
+  const featured = safaris.slice(0, 8);
+
+  // Two independent scroll containers
+  const promoScrollRef = useRef<HTMLDivElement>(null);
+  const featuredScrollRef = useRef<HTMLDivElement>(null);
 
   // ─── Hero carousel state ───
   const [slide, setSlide] = useState(0);
@@ -61,8 +56,12 @@ export default function Home() {
     return () => clearInterval(t);
   }, [paused, nextSlide]);
 
-  const scrollBy = (delta: number) => {
-    scrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+  // Scroll helper that works on either carousel
+  const scrollBy = (
+    ref: React.RefObject<HTMLDivElement>,
+    delta: number
+  ) => {
+    ref.current?.scrollBy({ left: delta, behavior: 'smooth' });
   };
 
   return (
@@ -92,7 +91,6 @@ export default function Home() {
               />
             </div>
           ))}
-          {/* Dark overlay for text legibility */}
           <div className="absolute inset-0 bg-black/50 z-10" />
         </div>
 
@@ -135,9 +133,7 @@ export default function Home() {
               { label: 'Destinations', val: '15+' },
             ].map((s, i) => (
               <div key={i} className="glass p-4 rounded-xl">
-                <div className="text-2xl font-bold text-amber-400">
-                  {s.val}
-                </div>
+                <div className="text-2xl font-bold text-amber-400">{s.val}</div>
                 <div className="text-xs text-gray-300 uppercase tracking-wider">
                   {s.label}
                 </div>
@@ -169,9 +165,7 @@ export default function Home() {
               key={i}
               onClick={() => setSlide(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`h-2 rounded-full transition-all duration-300 ${i === slide
-                ? 'bg-amber-500 w-8'
-                : 'bg-white/50 hover:bg-white/80 w-2'
+              className={`h-2 rounded-full transition-all duration-300 ${i === slide ? 'bg-amber-500 w-8' : 'bg-white/50 hover:bg-white/80 w-2'
                 }`}
             />
           ))}
@@ -198,7 +192,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* ═══════════ CURRENT PROMOTIONS ═══════════ */}
+      {/* ═══════════ CURRENT PROMOTIONS (carousel) ═══════════ */}
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-between items-end mb-10">
@@ -226,22 +220,22 @@ export default function Home() {
 
         <div className="relative overflow-hidden scrollbar-hide promotions-carousel">
           <button
-            onClick={() => scrollBy(-400)}
+            onClick={() => scrollBy(promoScrollRef, -400)}
             className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full glass hover:bg-white/20 items-center justify-center transition"
-            aria-label="Scroll left"
+            aria-label="Scroll promotions left"
           >
             <FaChevronRight className="rotate-180" size={14} />
           </button>
           <button
-            onClick={() => scrollBy(400)}
+            onClick={() => scrollBy(promoScrollRef, 400)}
             className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full glass hover:bg-white/20 items-center justify-center transition"
-            aria-label="Scroll right"
+            aria-label="Scroll promotions right"
           >
             <FaChevronRight size={14} />
           </button>
 
           <div
-            ref={scrollRef}
+            ref={promoScrollRef}
             className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-4 md:px-[max(1rem,calc((100vw-80rem)/2+1rem))] pb-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
@@ -289,61 +283,105 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════ FEATURED SAFARIS ═══════════ */}
-      <section className="py-24 px-4 max-w-7xl mx-auto">
-        <div className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              Featured Expeditions
-            </h2>
-            <p className="text-gray-400">
-              Hand-picked journeys for the discerning traveler.
-            </p>
+      {/* ═══════════ FEATURED EXPEDITIONS (carousel) ═══════════ */}
+      <section className="py-24">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">
+                Featured Expeditions
+              </h2>
+              <p className="text-gray-400">
+                Hand-picked journeys for the discerning traveler.
+              </p>
+            </div>
+            <Link
+              href="/uganda-safaris"
+              className="hidden md:flex items-center gap-1 text-amber-500 hover:text-amber-400 font-medium transition-colors whitespace-nowrap"
+            >
+              View All <FaChevronRight size={12} />
+            </Link>
           </div>
-          <Link
-            href="/uganda-safaris"
-            className="hidden md:flex items-center gap-1 text-amber-500 hover:text-amber-400 font-medium transition-colors"
-          >
-            View All <FaChevronRight size={12} />
-          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {featured.map((s) => (
-            <Link
-              key={s.slug}
-              href={`/safaris/${s.slug}`}
-              className="glass-card rounded-2xl overflow-hidden group cursor-pointer"
-            >
-              <div className="relative h-64 overflow-hidden">
-                <Image
-                  src={s.image}
-                  alt={s.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 33vw"
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute top-4 left-4">
-                  <span className="glass px-3 py-1 rounded-full text-xs font-bold bg-black/40">
-                    {s.category === 'uganda' ? 'Uganda' : 'Outbound'}
-                  </span>
+        <div className="relative overflow-hidden scrollbar-hide">
+          <button
+            onClick={() => scrollBy(featuredScrollRef, -400)}
+            className="hidden md:flex absolute left-2 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full glass hover:bg-white/20 items-center justify-center transition"
+            aria-label="Scroll featured left"
+          >
+            <FaChevronRight className="rotate-180" size={14} />
+          </button>
+          <button
+            onClick={() => scrollBy(featuredScrollRef, 400)}
+            className="hidden md:flex absolute right-2 top-1/2 -translate-y-1/2 z-10 w-11 h-11 rounded-full glass hover:bg-white/20 items-center justify-center transition"
+            aria-label="Scroll featured right"
+          >
+            <FaChevronRight size={14} />
+          </button>
+
+          <div
+            ref={featuredScrollRef}
+            className="flex gap-5 overflow-x-auto scroll-smooth snap-x snap-mandatory scrollbar-hide px-4 md:px-[max(1rem,calc((100vw-80rem)/2+1rem))] pb-4"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {featured.map((s) => (
+              <Link
+                key={s.slug}
+                href={`/safaris/${s.slug}`}
+                className="group glass-card rounded-2xl overflow-hidden shrink-0 snap-start w-[80%] sm:w-[55%] md:w-[320px]"
+              >
+                <div className="relative h-56 overflow-hidden">
+                  <Image
+                    src={s.image}
+                    alt={s.title}
+                    fill
+                    sizes="(max-width: 640px) 80vw, (max-width: 768px) 55vw, 320px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span className="glass px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-black/40 uppercase tracking-wider">
+                      {s.category === 'uganda' ? 'Uganda' : 'Outbound'}
+                    </span>
+                  </div>
+                  {/* Rating pill */}
+                  <div className="absolute top-3 right-3">
+                    <span className="glass px-2 py-0.5 rounded-full text-[10px] font-bold bg-black/40 flex items-center gap-1">
+                      <FaStar size={9} className="text-amber-400" />
+                      {(s.rating ?? 4.8).toFixed(1)}
+                    </span>
+                  </div>
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/30 to-transparent">
+                    <h3 className="text-white font-bold text-base leading-tight mb-1">
+                      {s.title}
+                    </h3>
+                    <p className="text-[11px] text-gray-300 line-clamp-1">
+                      {s.shortDesc}
+                    </p>
+                  </div>
                 </div>
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="text-xl font-bold">{s.title}</h3>
+                <div className="p-4 flex justify-between items-center border-t border-white/10">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <FaClock size={10} className="text-amber-400" />
+                    {s.duration}
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wider">From</div>
+                    <div className="font-bold text-amber-400 text-sm">${s.price} pp</div>
+                  </div>
                 </div>
-              </div>
-              <div className="p-5 flex justify-between items-center border-t border-white/10">
-                <div>
-                  <div className="text-xs text-gray-400 mb-1">Duration</div>
-                  <div className="font-semibold">{s.duration}</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-xs text-gray-400 mb-1">From</div>
-                  <div className="font-bold text-amber-400">${s.price} pp</div>
-                </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-6 text-center md:hidden">
+          <Link
+            href="/uganda-safaris"
+            className="inline-flex items-center gap-1 text-amber-500 font-medium text-sm"
+          >
+            View All Safaris <FaChevronRight size={12} />
+          </Link>
         </div>
       </section>
 
@@ -357,26 +395,10 @@ export default function Home() {
           </p>
           <div className="grid sm:grid-cols-2 gap-4">
             {[
-              {
-                icon: <FaBinoculars size={24} />,
-                title: 'Expert Guides',
-                desc: 'Local knowledge, global standards.',
-              },
-              {
-                icon: <MdSecurity size={24} />,
-                title: 'Safe & Secure',
-                desc: 'Your safety is our top priority.',
-              },
-              {
-                icon: <FaLeaf size={24} />,
-                title: 'Eco-Conscious',
-                desc: 'Travel that protects the wild.',
-              },
-              {
-                icon: <FaUsers size={24} />,
-                title: 'Small Groups',
-                desc: 'Intimate, personalized experiences.',
-              },
+              { icon: <FaBinoculars size={24} />, title: 'Expert Guides', desc: 'Local knowledge, global standards.' },
+              { icon: <MdSecurity size={24} />, title: 'Safe & Secure', desc: 'Your safety is our top priority.' },
+              { icon: <FaLeaf size={24} />, title: 'Eco-Conscious', desc: 'Travel that protects the wild.' },
+              { icon: <FaUsers size={24} />, title: 'Small Groups', desc: 'Intimate, personalized experiences.' },
             ].map((f, i) => (
               <div key={i} className="glass p-5 rounded-2xl">
                 <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-500 mb-3">

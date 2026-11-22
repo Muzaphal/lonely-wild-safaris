@@ -58,7 +58,7 @@ export default function Home() {
 
   // Scroll helper that works on either carousel
   const scrollBy = (
-    ref: React.RefObject<HTMLDivElement>,
+    ref: React.RefObject<HTMLDivElement | null>,
     delta: number
   ) => {
     ref.current?.scrollBy({ left: delta, behavior: 'smooth' });

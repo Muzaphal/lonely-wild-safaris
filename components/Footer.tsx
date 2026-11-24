@@ -1,13 +1,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-    FaCompass,
     FaFacebookF,
     FaInstagram,
     FaTwitter,
     FaPhoneAlt,
-    FaEnvelope,
 } from 'react-icons/fa';
+import CopyEmail from './CopyEmail';
+import { site } from '@/data/site';
 
 // Cache the year so Next.js doesn't treat it as an unstable value
 async function getCurrentYear() {
@@ -37,7 +37,8 @@ export default async function Footer() {
                         />
                     </Link>
                     <p className="text-sm text-gray-400">
-                        Curated safaris across East Africa. Authentic, responsible, unforgettable.
+                        Curated safaris across East Africa. Authentic, responsible,
+                        unforgettable.
                     </p>
                     <div className="flex gap-4 mt-4 text-gray-400">
                         <a href="#" className="hover:text-amber-500" aria-label="Facebook">
@@ -98,13 +99,19 @@ export default async function Footer() {
                             </Link>
                         </li>
                         <li>
-                            <Link href="/faqs" className="hover:text-amber-500">FAQs</Link>
+                            <Link href="/faqs" className="hover:text-amber-500">
+                                FAQs
+                            </Link>
                         </li>
                         <li>
-                            <Link href="/privacy" className="hover:text-amber-500">Privacy Policy</Link>
+                            <Link href="/privacy" className="hover:text-amber-500">
+                                Privacy Policy
+                            </Link>
                         </li>
                         <li>
-                            <Link href="/terms" className="hover:text-amber-500">Terms</Link>
+                            <Link href="/terms" className="hover:text-amber-500">
+                                Terms
+                            </Link>
                         </li>
                     </ul>
                 </div>
@@ -116,21 +123,18 @@ export default async function Footer() {
                     </h4>
                     <ul className="space-y-3 text-sm text-gray-400">
                         <li className="flex items-center gap-2">
-                            <FaPhoneAlt className="text-amber-500" />
-                            <a href="tel:+256771222081" className="hover:text-amber-500">
-                                +256 771 222 081
-                            </a>
-                        </li>
-                        <li className="flex items-center gap-2">
-                            <FaEnvelope className="text-amber-500" />
+                            <FaPhoneAlt className="text-amber-500 shrink-0" />
                             <a
-                                href="mailto:lonelywildsafaris@gmail.com"
-                                className="hover:text-amber-500 break-all"
+                                href={`tel:${site.phone.replace(/\s/g, '')}`}
+                                className="hover:text-amber-500"
                             >
-                                lonelywildsafaris@gmail.com
+                                {site.phone}
                             </a>
                         </li>
-                        <li>Kampala, Uganda</li>
+                        <li>
+                            <CopyEmail email={site.email} />
+                        </li>
+                        <li>{site.address}</li>
                     </ul>
                 </div>
             </div>

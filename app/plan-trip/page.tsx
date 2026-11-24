@@ -153,7 +153,7 @@ export default function PlanTripPage() {
             case 3:
                 return form.days.trim() !== '';
             case 4:
-                return true; // budget optional
+                return true;
             case 5:
                 return form.startDate !== '';
             case 6:
@@ -181,14 +181,8 @@ export default function PlanTripPage() {
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // TODO: replace with real API call / email service
-        console.log('Plan form submitted:', form);
-        setSubmitted(true);
-    };
-
-    const waMessage = encodeURIComponent(
+    // Build the WhatsApp text once
+    const buildMessage = () =>
         `Hello Lonely Wild Safaris! I'd like to plan a safari.\n\n` +
         `Countries: ${form.countries.join(', ') || '—'}\n` +
         `Activities: ${form.activities.join(', ') || '—'}\n` +
@@ -201,8 +195,43 @@ export default function PlanTripPage() {
         `Email: ${form.email}\n` +
         `Phone: ${form.phone}\n` +
         `Country: ${form.country}\n` +
-        `Notes: ${form.extraInfo}`
-    );
+        `Notes: ${form.extraInfo}`;
+
+    // Reset everything back to a fresh form
+    const resetForm = () => {
+        setForm(initialForm);
+        setStep(0);
+        setSubmitted(false);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        // TODO: replace with real API call / email service
+        console.log('Plan form submitted:', form);
+        setSubmitted(true);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const waHref = `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(
+        buildMessage()
+    )}`;
+
+    const emailSubject = `Safari Enquiry – ${form.fullName || 'New client'}`;
+    const emailBody = buildMessage();
+
+    // Gmail web compose (works everywhere — no email client needed)
+    const gmailComposeUrl =
+        `https://mail.google.com/mail/?view=cm&fs=1` +
+        `&to=${encodeURIComponent(site.email)}` +
+        `&su=${encodeURIComponent(emailSubject)}` +
+        `&body=${encodeURIComponent(emailBody)}`;
+
+    // Optional native mailto fallback for users who prefer a local email app
+    const mailtoUrl =
+        `mailto:${site.email}` +
+        `?subject=${encodeURIComponent(emailSubject)}` +
+        `&body=${encodeURIComponent(emailBody)}`;
 
     // ─── Success screen ───
     if (submitted) {
@@ -210,7 +239,7 @@ export default function PlanTripPage() {
             <>
                 <PageHero
                     title="Thank You!"
-                    subtitle="Your safari enquiry has been received."
+                    subtitle="Your safari enquiry is ready to send."
                     image="https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=2000&auto=format&fit=crop"
                 />
                 <section className="max-w-2xl mx-auto px-4 py-20">
@@ -220,19 +249,49 @@ export default function PlanTripPage() {
                             Thanks, {form.fullName.split(' ')[0] || 'traveler'}!
                         </h2>
                         <p className="text-gray-300 mb-6">
-                            Our safari specialists will reply to{' '}
-                            <span className="text-amber-400">{form.email}</span> within 24
-                            hours with a tailored itinerary.
+                            Choose how you&apos;d like to send your enquiry — we&apos;ll reply
+                            within 24 hours with a tailored itinerary.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+
+                        {/* Delivery options */}
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
                             <a
-                                href={`https://wa.me/${site.whatsappNumber}?text=${waMessage}`}
+                                href={waHref}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold transition"
                             >
-                                <FaWhatsapp /> Chat on WhatsApp
+                                <FaWhatsapp /> Send via WhatsApp
                             </a>
+                            <a
+                                href={gmailComposeUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg font-bold transition"
+                            >
+                                <FaEnvelope /> Send via Email
+                            </a>
+                        </div>
+
+                        {/* Native mail app fallback */}
+                        <p className="text-xs text-gray-500 mb-6">
+                            Email opens Gmail compose in a new tab.{' '}
+                            <a
+                                href={mailtoUrl}
+                                className="text-amber-400 hover:text-amber-300 underline"
+                            >
+                                Use your default email app instead
+                            </a>
+                        </p>
+
+                        {/* Actions */}
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 border-t border-white/10">
+                            <button
+                                onClick={resetForm}
+                                className="inline-flex items-center justify-center gap-2 glass hover:bg-white/15 px-6 py-3 rounded-lg font-bold transition"
+                            >
+                                Start a New Enquiry
+                            </button>
                             <Link
                                 href="/"
                                 className="inline-flex items-center justify-center gap-2 glass hover:bg-white/15 px-6 py-3 rounded-lg font-bold transition"
@@ -240,6 +299,11 @@ export default function PlanTripPage() {
                                 Back to Home
                             </Link>
                         </div>
+
+                        <p className="text-xs text-gray-500 mt-4">
+                            The form will reset automatically when you click “Start a New
+                            Enquiry.”
+                        </p>
                     </div>
                 </section>
             </>
@@ -274,7 +338,6 @@ export default function PlanTripPage() {
                             }}
                         />
                     </div>
-                    {/* Step dots */}
                     <div className="hidden sm:flex justify-between mt-3">
                         {stepTitles.map((t, i) => (
                             <div
@@ -294,7 +357,7 @@ export default function PlanTripPage() {
 
                 {/* Form card */}
                 <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 md:p-10">
-                    {/* ─── STEP 1: Countries ─── */}
+                    {/* ─── STEP 1 ─── */}
                     {step === 0 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">
@@ -305,7 +368,6 @@ export default function PlanTripPage() {
                                 international stopover.
                             </p>
 
-                            {/* Tabs */}
                             <div className="flex gap-2 mb-5 border-b border-white/10 pb-3">
                                 {[
                                     {
@@ -336,7 +398,6 @@ export default function PlanTripPage() {
                                 ))}
                             </div>
 
-                            {/* Select all / Clear */}
                             <div className="flex justify-end gap-2 mb-3">
                                 <button
                                     type="button"
@@ -355,16 +416,13 @@ export default function PlanTripPage() {
                                 <span className="text-gray-600">·</span>
                                 <button
                                     type="button"
-                                    onClick={() =>
-                                        setForm((f) => ({ ...f, countries: [] }))
-                                    }
+                                    onClick={() => setForm((f) => ({ ...f, countries: [] }))}
                                     className="text-xs text-gray-400 hover:text-white"
                                 >
                                     Clear all
                                 </button>
                             </div>
 
-                            {/* Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                 {activeCountryList.map((c) => {
                                     const active = form.countries.includes(c);
@@ -387,7 +445,6 @@ export default function PlanTripPage() {
                                 })}
                             </div>
 
-                            {/* Selected chip list */}
                             {form.countries.length > 0 && (
                                 <div className="mt-5 pt-4 border-t border-white/10">
                                     <p className="text-xs text-gray-400 mb-2 uppercase tracking-wider">
@@ -416,7 +473,7 @@ export default function PlanTripPage() {
                         </div>
                     )}
 
-                    {/* ─── STEP 2: Activities ─── */}
+                    {/* ─── STEP 2 ─── */}
                     {step === 1 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">
@@ -447,7 +504,7 @@ export default function PlanTripPage() {
                         </div>
                     )}
 
-                    {/* ─── STEP 3: Travellers ─── */}
+                    {/* ─── STEP 3 ─── */}
                     {step === 2 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">
@@ -477,7 +534,7 @@ export default function PlanTripPage() {
                         </div>
                     )}
 
-                    {/* ─── STEP 4: Duration ─── */}
+                    {/* ─── STEP 4 ─── */}
                     {step === 3 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">
@@ -498,7 +555,7 @@ export default function PlanTripPage() {
                         </div>
                     )}
 
-                    {/* ─── STEP 5: Budget ─── */}
+                    {/* ─── STEP 5 ─── */}
                     {step === 4 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">
@@ -520,13 +577,13 @@ export default function PlanTripPage() {
                                 />
                             </div>
                             <p className="text-xs text-gray-500 mt-3">
-                                Leave blank if you&apos;re flexible — we&apos;ll suggest options
-                                across tiers.
+                                Leave blank if you&apos;re flexible — we&apos;ll suggest
+                                options across tiers.
                             </p>
                         </div>
                     )}
 
-                    {/* ─── STEP 6: Dates & People ─── */}
+                    {/* ─── STEP 6 ─── */}
                     {step === 5 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">
@@ -600,7 +657,7 @@ export default function PlanTripPage() {
                         </div>
                     )}
 
-                    {/* ─── STEP 7: Contact ─── */}
+                    {/* ─── STEP 7 ─── */}
                     {step === 6 && (
                         <div>
                             <h2 className="text-xl font-bold mb-1">7. Contact Details</h2>
@@ -671,7 +728,6 @@ export default function PlanTripPage() {
                                 />
                             </div>
 
-                            {/* Summary snippet */}
                             <div className="mt-6 p-4 rounded-lg bg-white/5 border border-white/10 text-xs text-gray-400 space-y-1">
                                 <p className="text-amber-400 font-bold uppercase tracking-wider mb-2">
                                     Your Safari Summary
@@ -703,7 +759,7 @@ export default function PlanTripPage() {
                         </div>
                     )}
 
-                    {/* Navigation buttons */}
+                    {/* Nav buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 justify-between items-center mt-8 pt-6 border-t border-white/10">
                         <button
                             type="button"
@@ -748,7 +804,9 @@ export default function PlanTripPage() {
                     </a>{' '}
                     or email{' '}
                     <a
-                        href={`mailto:${site.email}`}
+                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${site.email}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="text-amber-400 hover:text-amber-300"
                     >
                         {site.email}

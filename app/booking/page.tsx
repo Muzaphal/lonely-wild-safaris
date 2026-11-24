@@ -165,12 +165,12 @@ function BookingInner() {
                             </div>
                         </div>
 
-                        <button
+                        {/* <button
                             onClick={() => setPayOpen(true)}
                             className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-lg font-bold"
                         >
                             <FaCreditCard /> Pay by Credit Card
-                        </button>
+                        </button> */}
                         <a
                             href={`https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(`New booking: ${selected.title}, ${form.adults} adults, date ${form.date}`)}`}
                             target="_blank"

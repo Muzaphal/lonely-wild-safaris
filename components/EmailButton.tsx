@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaEnvelope, FaCheck, FaCopy } from 'react-icons/fa';
 
 interface EmailButtonProps {
@@ -19,30 +19,33 @@ export default function EmailButton({
     className = '',
 }: EmailButtonProps) {
     const [copied, setCopied] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [mounted, setMounted] = useState(false);
 
-    const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        e.preventDefault();
+    // Detect mobile only after mounting to avoid hydration mismatch
+    useEffect(() => {
+        const checkMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        setIsMobile(checkMobile);
+        setMounted(true);
+    }, []);
 
-        // Simple mobile detection
-        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    const mailtoLink =
+        `mailto:${to}` +
+        `?subject=${encodeURIComponent(subject)}` +
+        `&body=${encodeURIComponent(body)}`;
 
-        if (isMobile) {
-            // FORCE mailto on mobile. This is the ONLY way to open the app chooser.
-            // Do NOT fall back to the Gmail web link here.
-            const mailto =
-                `mailto:${to}` +
-                `?subject=${encodeURIComponent(subject)}` +
-                `&body=${encodeURIComponent(body)}`;
-            window.location.href = mailto;
-        } else {
-            // Desktop: Use Gmail web compose (works reliably here)
-            const gmail =
-                `https://mail.google.com/mail/?view=cm&fs=1` +
-                `&to=${encodeURIComponent(to)}` +
-                `&su=${encodeURIComponent(subject)}` +
-                `&body=${encodeURIComponent(body)}`;
-            window.open(gmail, '_blank', 'noopener,noreferrer');
+    const gmailLink =
+        `https://mail.google.com/mail/?view=cm&fs=1` +
+        `&to=${encodeURIComponent(to)}` +
+        `&su=${encodeURIComponent(subject)}` +
+        `&body=${encodeURIComponent(body)}`;
+
+    const handleDesktopClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+        if (!isMobile) {
+            e.preventDefault();
+            window.open(gmailLink, '_blank', 'noopener,noreferrer');
         }
+        // On mobile, we do NOTHING here. We let the native <a href="mailto:"> take over.
     };
 
     const copyAll = async () => {
@@ -63,13 +66,21 @@ export default function EmailButton({
 
     return (
         <div className="inline-flex flex-col items-center gap-1">
+            {/* 
+        We use a real <a> tag. 
+        If mobile: href is "mailto:..." (OS intercepts this perfectly).
+        If desktop: href is Gmail link, but we intercept the click to open in a new tab.
+      */}
             <a
-                href="#"
-                onClick={handleClick}
+                href={mounted && isMobile ? mailtoLink : gmailLink}
+                target={mounted && isMobile ? '_self' : '_blank'}
+                rel="noopener noreferrer"
+                onClick={handleDesktopClick}
                 className={`inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg font-bold transition ${className}`}
             >
                 <FaEnvelope /> {label}
             </a>
+
             <button
                 type="button"
                 onClick={copyAll}

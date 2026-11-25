@@ -2,21 +2,42 @@
 
 import { useState } from 'react';
 import PageHero from '@/components/PageHero';
-import { FaPlane } from 'react-icons/fa';
+import EmailButton from '@/components/EmailButton';
+import { FaPlane, FaWhatsapp, FaEnvelope } from 'react-icons/fa';
 import { site } from '@/data/site';
 
 export default function AirTicketPage() {
     const [form, setForm] = useState({
-        from: '', to: '', date: '', flex: '0',
+        from: '', to: '', date: '', returnDate: '',
         cabin: 'Economy', adults: 1, children: 0, infants: 0,
     });
     const [submitted, setSubmitted] = useState(false);
+    const [sending, setSending] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: email / backend
-        setSubmitted(true);
+        setSending(true);
+        // Simulate a brief loading state before showing the success screen
+        setTimeout(() => {
+            setSending(false);
+            setSubmitted(true);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 600);
     };
+
+    // ─── Build the message strings for WhatsApp and Email ───
+    const messageBody =
+        `Hello Lonely Wild Safaris! I'd like to enquire about an air ticket.\n\n` +
+        `Departure City: ${form.from}\n` +
+        `Arrival City: ${form.to}\n` +
+        `Travel Date: ${form.date}\n` +
+        `Return Date: ${form.returnDate}\n` +
+        `Cabin Class: ${form.cabin}\n` +
+        `Passengers: ${form.adults} Adult(s), ${form.children} Child(ren), ${form.infants} Infant(s)\n\n` +
+        `Please send me a quote.`;
+
+    const waHref = `https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(messageBody)}`;
+    const emailSubject = `Air Ticket Enquiry – ${form.from} to ${form.to}`;
 
     return (
         <>
@@ -29,10 +50,41 @@ export default function AirTicketPage() {
                 {submitted ? (
                     <div className="glass rounded-2xl p-10 text-center">
                         <div className="text-5xl mb-4">✈️</div>
-                        <h2 className="text-2xl font-bold mb-2">Enquiry Received!</h2>
-                        <p className="text-gray-400">
-                            Our ticketing team will email a quote to <strong>{site.email}</strong> shortly.
+                        <h2 className="text-2xl font-bold mb-3">Enquiry Ready to Send!</h2>
+                        <p className="text-gray-300 mb-6">
+                            Choose how you&apos;d like to send your request. Our ticketing team will reply with a quote shortly.
                         </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-6">
+                            <a
+                                href={waHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 px-6 py-3 rounded-lg font-bold transition w-full sm:w-auto"
+                            >
+                                <FaWhatsapp /> Send via WhatsApp
+                            </a>
+                            <EmailButton
+                                to={site.email}
+                                subject={emailSubject}
+                                body={messageBody}
+                                label="Send via Email"
+                                className="w-full sm:w-auto"
+                            />
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setForm({
+                                    from: '', to: '', date: '', returnDate: '',
+                                    cabin: 'Economy', adults: 1, children: 0, infants: 0,
+                                });
+                                setSubmitted(false);
+                            }}
+                            className="text-xs text-amber-400 hover:text-amber-300 underline"
+                        >
+                            Start a new enquiry
+                        </button>
                     </div>
                 ) : (
                     <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 md:p-10 space-y-4">
@@ -55,14 +107,9 @@ export default function AirTicketPage() {
                                     className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500" />
                             </div>
                             <div>
-                                <label className="text-xs text-gray-400">Dates Flexible (± days)</label>
-                                <select value={form.flex} onChange={(e) => setForm({ ...form, flex: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500">
-                                    <option value="0">Exact date</option>
-                                    <option value="1">± 1 day</option>
-                                    <option value="2">± 2 days</option>
-                                    <option value="3">± 3 days</option>
-                                </select>
+                                <label className="text-xs text-gray-400">Return Date</label>
+                                <input type="date" value={form.returnDate} onChange={(e) => setForm({ ...form, returnDate: e.target.value })}
+                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500" />
                             </div>
                         </div>
                         <div>
@@ -92,8 +139,11 @@ export default function AirTicketPage() {
                                 </div>
                             ))}
                         </div>
-                        <button className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-lg font-bold">
-                            <FaPlane /> Send Enquiry
+                        <button
+                            disabled={sending}
+                            className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 px-4 py-3 rounded-lg font-bold transition"
+                        >
+                            <FaPlane /> {sending ? 'Preparing...' : 'Continue'}
                         </button>
                     </form>
                 )}

@@ -1,16 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaCopy, FaCheck, FaEnvelope } from 'react-icons/fa';
 
 export default function CopyEmail({ email }: { email: string }) {
     const [copied, setCopied] = useState(false);
+    const [isMobile, setIsMobile] = useState(false);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        const checkMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        setIsMobile(checkMobile);
+        setMounted(true);
+    }, []);
 
     const copy = async () => {
         try {
             await navigator.clipboard.writeText(email);
         } catch {
-            // Fallback for older browsers
             const ta = document.createElement('textarea');
             ta.value = email;
             document.body.appendChild(ta);
@@ -22,12 +29,15 @@ export default function CopyEmail({ email }: { email: string }) {
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const mailtoLink = `mailto:${email}`;
+    const gmailLink = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}`;
+
     return (
         <span className="inline-flex items-center gap-2 min-w-0">
             <FaEnvelope className="text-amber-500 shrink-0" />
             <a
-                href={`https://mail.google.com/mail/?view=cm&fs=1&to=${email}`}
-                target="_blank"
+                href={mounted && isMobile ? mailtoLink : gmailLink}
+                target={mounted && isMobile ? '_self' : '_blank'}
                 rel="noopener noreferrer"
                 className="hover:text-amber-500 break-all"
             >

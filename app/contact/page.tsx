@@ -57,7 +57,7 @@ function ContactInner() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSending(true);
-        // For now: open WhatsApp with the message so nothing is lost
+        // Open WhatsApp immediately so the message isn't lost
         window.open(waHref, '_blank', 'noopener,noreferrer');
         setTimeout(() => {
             setSending(false);
@@ -110,8 +110,8 @@ function ContactInner() {
                     </a>
 
                     <p className="text-xs text-gray-500 pt-3 border-t border-white/10">
-                        Click the email address to open your email app. Use the copy button
-                        to paste it into any email service.
+                        On mobile, clicking the email address opens your email app.
+                        On desktop, it opens Gmail. Use the copy button to paste it manually.
                     </p>
                 </div>
 

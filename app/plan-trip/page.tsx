@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import PageHero from '@/components/PageHero';
 import Link from 'next/link';
+import EmailButton from '@/components/EmailButton';
 import {
     FaCheck,
     FaChevronLeft,
@@ -79,7 +80,6 @@ const activities = [
 
 const travellers = ['Solo', 'Couple', 'Honeymoon', 'Family', 'Group', 'Others'];
 
-// ─── Form state type ───
 interface PlanForm {
     countries: string[];
     activities: string[];
@@ -181,7 +181,6 @@ export default function PlanTripPage() {
         }
     };
 
-    // Build the WhatsApp text once
     const buildMessage = () =>
         `Hello Lonely Wild Safaris! I'd like to plan a safari.\n\n` +
         `Countries: ${form.countries.join(', ') || '—'}\n` +
@@ -197,7 +196,6 @@ export default function PlanTripPage() {
         `Country: ${form.country}\n` +
         `Notes: ${form.extraInfo}`;
 
-    // Reset everything back to a fresh form
     const resetForm = () => {
         setForm(initialForm);
         setStep(0);
@@ -207,7 +205,6 @@ export default function PlanTripPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // TODO: replace with real API call / email service
         console.log('Plan form submitted:', form);
         setSubmitted(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -220,20 +217,6 @@ export default function PlanTripPage() {
     const emailSubject = `Safari Enquiry – ${form.fullName || 'New client'}`;
     const emailBody = buildMessage();
 
-    // Gmail web compose (works everywhere — no email client needed)
-    const gmailComposeUrl =
-        `https://mail.google.com/mail/?view=cm&fs=1` +
-        `&to=${encodeURIComponent(site.email)}` +
-        `&su=${encodeURIComponent(emailSubject)}` +
-        `&body=${encodeURIComponent(emailBody)}`;
-
-    // Optional native mailto fallback for users who prefer a local email app
-    const mailtoUrl =
-        `mailto:${site.email}` +
-        `?subject=${encodeURIComponent(emailSubject)}` +
-        `&body=${encodeURIComponent(emailBody)}`;
-
-    // ─── Success screen ───
     if (submitted) {
         return (
             <>
@@ -253,8 +236,7 @@ export default function PlanTripPage() {
                             within 24 hours with a tailored itinerary.
                         </p>
 
-                        {/* Delivery options */}
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-4">
                             <a
                                 href={waHref}
                                 target="_blank"
@@ -263,28 +245,20 @@ export default function PlanTripPage() {
                             >
                                 <FaWhatsapp /> Send via WhatsApp
                             </a>
-                            <a
-                                href={gmailComposeUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg font-bold transition"
-                            >
-                                <FaEnvelope /> Send via Email
-                            </a>
+                            <EmailButton
+                                to={site.email}
+                                subject={emailSubject}
+                                body={emailBody}
+                                label="Send via Email"
+                            />
                         </div>
 
-                        {/* Native mail app fallback */}
                         <p className="text-xs text-gray-500 mb-6">
-                            Email opens Gmail compose in a new tab.{' '}
-                            <a
-                                href={mailtoUrl}
-                                className="text-amber-400 hover:text-amber-300 underline"
-                            >
-                                Use your default email app instead
-                            </a>
+                            On mobile this opens your email app. On desktop it opens Gmail in
+                            a new tab. If nothing opens, use{" "}
+                            <span className="text-amber-400">Copy instead</span>.
                         </p>
 
-                        {/* Actions */}
                         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4 border-t border-white/10">
                             <button
                                 onClick={resetForm}
@@ -299,11 +273,6 @@ export default function PlanTripPage() {
                                 Back to Home
                             </Link>
                         </div>
-
-                        <p className="text-xs text-gray-500 mt-4">
-                            The form will reset automatically when you click “Start a New
-                            Enquiry.”
-                        </p>
                     </div>
                 </section>
             </>
@@ -322,7 +291,7 @@ export default function PlanTripPage() {
             />
 
             <section className="max-w-4xl mx-auto px-4 py-16">
-                {/* Progress bar */}
+                {/* Progress */}
                 <div className="mb-10">
                     <div className="flex justify-between items-center mb-2">
                         <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
@@ -355,7 +324,6 @@ export default function PlanTripPage() {
                     </div>
                 </div>
 
-                {/* Form card */}
                 <form onSubmit={handleSubmit} className="glass rounded-2xl p-6 md:p-10">
                     {/* ─── STEP 1 ─── */}
                     {step === 0 && (
@@ -370,16 +338,8 @@ export default function PlanTripPage() {
 
                             <div className="flex gap-2 mb-5 border-b border-white/10 pb-3">
                                 {[
-                                    {
-                                        key: 'africa' as const,
-                                        label: '🌍 Africa & Islands',
-                                        count: countriesAfrica.length,
-                                    },
-                                    {
-                                        key: 'intl' as const,
-                                        label: '🌐 International',
-                                        count: countriesInternational.length,
-                                    },
+                                    { key: 'africa' as const, label: '🌍 Africa & Islands', count: countriesAfrica.length },
+                                    { key: 'intl' as const, label: '🌐 International', count: countriesInternational.length },
                                 ].map((tab) => (
                                     <button
                                         key={tab.key}
@@ -391,9 +351,7 @@ export default function PlanTripPage() {
                                             }`}
                                     >
                                         {tab.label}
-                                        <span className="ml-2 text-xs opacity-60">
-                                            ({tab.count})
-                                        </span>
+                                        <span className="ml-2 text-xs opacity-60">({tab.count})</span>
                                     </button>
                                 ))}
                             </div>
@@ -401,14 +359,12 @@ export default function PlanTripPage() {
                             <div className="flex justify-end gap-2 mb-3">
                                 <button
                                     type="button"
-                                    onClick={() => {
+                                    onClick={() =>
                                         setForm((f) => ({
                                             ...f,
-                                            countries: Array.from(
-                                                new Set([...f.countries, ...activeCountryList])
-                                            ),
-                                        }));
-                                    }}
+                                            countries: Array.from(new Set([...f.countries, ...activeCountryList])),
+                                        }))
+                                    }
                                     className="text-xs text-amber-400 hover:text-amber-300"
                                 >
                                     Select all in tab
@@ -476,12 +432,8 @@ export default function PlanTripPage() {
                     {/* ─── STEP 2 ─── */}
                     {step === 1 && (
                         <div>
-                            <h2 className="text-xl font-bold mb-1">
-                                2. What do you want to do?
-                            </h2>
-                            <p className="text-sm text-gray-400 mb-6">
-                                Choose all that interest you.
-                            </p>
+                            <h2 className="text-xl font-bold mb-1">2. What do you want to do?</h2>
+                            <p className="text-sm text-gray-400 mb-6">Choose all that interest you.</p>
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                                 {activities.map((a) => {
                                     const active = form.activities.includes(a);
@@ -507,9 +459,7 @@ export default function PlanTripPage() {
                     {/* ─── STEP 3 ─── */}
                     {step === 2 && (
                         <div>
-                            <h2 className="text-xl font-bold mb-1">
-                                3. Who are you travelling with?
-                            </h2>
+                            <h2 className="text-xl font-bold mb-1">3. Who are you travelling with?</h2>
                             <p className="text-sm text-gray-400 mb-6">
                                 This helps us tailor the experience.
                             </p>
@@ -569,16 +519,14 @@ export default function PlanTripPage() {
                                 <input
                                     type="text"
                                     value={form.budget}
-                                    onChange={(e) =>
-                                        setForm({ ...form, budget: e.target.value })
-                                    }
+                                    onChange={(e) => setForm({ ...form, budget: e.target.value })}
                                     placeholder="e.g. 2,500 – 4,000 USD per person"
                                     className="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                 />
                             </div>
                             <p className="text-xs text-gray-500 mt-3">
-                                Leave blank if you&apos;re flexible — we&apos;ll suggest
-                                options across tiers.
+                                Leave blank if you&apos;re flexible — we&apos;ll suggest options
+                                across tiers.
                             </p>
                         </div>
                     )}
@@ -596,15 +544,12 @@ export default function PlanTripPage() {
                             <div className="space-y-4">
                                 <div>
                                     <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                                        <FaCalendarAlt className="text-amber-500" /> Travel Start
-                                        Date
+                                        <FaCalendarAlt className="text-amber-500" /> Travel Start Date
                                     </label>
                                     <input
                                         type="date"
                                         value={form.startDate}
-                                        onChange={(e) =>
-                                            setForm({ ...form, startDate: e.target.value })
-                                        }
+                                        onChange={(e) => setForm({ ...form, startDate: e.target.value })}
                                         className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                     />
                                 </div>
@@ -618,9 +563,7 @@ export default function PlanTripPage() {
                                             type="number"
                                             min={1}
                                             value={form.adults}
-                                            onChange={(e) =>
-                                                setForm({ ...form, adults: +e.target.value })
-                                            }
+                                            onChange={(e) => setForm({ ...form, adults: +e.target.value })}
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                         />
                                     </div>
@@ -632,9 +575,7 @@ export default function PlanTripPage() {
                                             type="number"
                                             min={0}
                                             value={form.children}
-                                            onChange={(e) =>
-                                                setForm({ ...form, children: +e.target.value })
-                                            }
+                                            onChange={(e) => setForm({ ...form, children: +e.target.value })}
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                         />
                                     </div>
@@ -646,9 +587,7 @@ export default function PlanTripPage() {
                                             type="number"
                                             min={1}
                                             value={form.rooms}
-                                            onChange={(e) =>
-                                                setForm({ ...form, rooms: +e.target.value })
-                                            }
+                                            onChange={(e) => setForm({ ...form, rooms: +e.target.value })}
                                             className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                         />
                                     </div>
@@ -673,9 +612,7 @@ export default function PlanTripPage() {
                                         type="text"
                                         placeholder="Full Name"
                                         value={form.fullName}
-                                        onChange={(e) =>
-                                            setForm({ ...form, fullName: e.target.value })
-                                        }
+                                        onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                                         className="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                     />
                                 </div>
@@ -686,9 +623,7 @@ export default function PlanTripPage() {
                                         type="email"
                                         placeholder="Email"
                                         value={form.email}
-                                        onChange={(e) =>
-                                            setForm({ ...form, email: e.target.value })
-                                        }
+                                        onChange={(e) => setForm({ ...form, email: e.target.value })}
                                         className="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                     />
                                 </div>
@@ -699,9 +634,7 @@ export default function PlanTripPage() {
                                         type="tel"
                                         placeholder="Phone (with country code)"
                                         value={form.phone}
-                                        onChange={(e) =>
-                                            setForm({ ...form, phone: e.target.value })
-                                        }
+                                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
                                         className="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                     />
                                 </div>
@@ -711,9 +644,7 @@ export default function PlanTripPage() {
                                         type="text"
                                         placeholder="Country"
                                         value={form.country}
-                                        onChange={(e) =>
-                                            setForm({ ...form, country: e.target.value })
-                                        }
+                                        onChange={(e) => setForm({ ...form, country: e.target.value })}
                                         className="w-full bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-amber-500"
                                     />
                                 </div>
@@ -721,9 +652,7 @@ export default function PlanTripPage() {
                                     rows={4}
                                     placeholder="Extra Info — anything else we should know?"
                                     value={form.extraInfo}
-                                    onChange={(e) =>
-                                        setForm({ ...form, extraInfo: e.target.value })
-                                    }
+                                    onChange={(e) => setForm({ ...form, extraInfo: e.target.value })}
                                     className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500 resize-none"
                                 />
                             </div>
@@ -742,8 +671,8 @@ export default function PlanTripPage() {
                                 </p>
                                 <p>
                                     <strong className="text-gray-300">Group:</strong>{' '}
-                                    {form.traveller || '—'} · {form.adults} adult(s),{' '}
-                                    {form.children} child(ren), {form.rooms} room(s)
+                                    {form.traveller || '—'} · {form.adults} adult(s), {form.children}{' '}
+                                    child(ren), {form.rooms} room(s)
                                 </p>
                                 <p>
                                     <strong className="text-gray-300">Duration:</strong>{' '}
@@ -804,9 +733,7 @@ export default function PlanTripPage() {
                     </a>{' '}
                     or email{' '}
                     <a
-                        href={`https://mail.google.com/mail/?view=cm&fs=1&to=${site.email}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        href={`mailto:${site.email}`}
                         className="text-amber-400 hover:text-amber-300"
                     >
                         {site.email}

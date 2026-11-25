@@ -4,9 +4,9 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHero from '@/components/PageHero';
 import CopyEmail from '@/components/CopyEmail';
+import EmailButton from '@/components/EmailButton';
 import {
     FaPhoneAlt,
-    FaEnvelope,
     FaMapMarkerAlt,
     FaWhatsapp,
     FaPaperPlane,
@@ -25,7 +25,6 @@ function ContactInner() {
         message: '',
     });
 
-    // Pre-fill message if arriving from a promotion
     useEffect(() => {
         const promo = params.get('promo');
         if (promo) {
@@ -40,21 +39,26 @@ function ContactInner() {
         }
     }, [params]);
 
+    const waText = encodeURIComponent(
+        `New enquiry from ${form.name}\n` +
+        `Email: ${form.email}\n` +
+        (form.phone ? `Phone: ${form.phone}\n` : '') +
+        `\nMessage:\n${form.message}`
+    );
+    const waHref = `https://wa.me/${site.whatsappNumber}?text=${waText}`;
+
+    const emailSubject = `Website Enquiry – ${form.name || 'New client'}`;
+    const emailBody =
+        `Name: ${form.name}\n` +
+        `Email: ${form.email}\n` +
+        (form.phone ? `Phone: ${form.phone}\n` : '') +
+        `\nMessage:\n${form.message}`;
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSending(true);
-        // TODO: replace with Formspree / Resend / API route
         // For now: open WhatsApp with the message so nothing is lost
-        const waText = encodeURIComponent(
-            `New enquiry from ${form.name}\n` +
-            `Email: ${form.email}\n` +
-            (form.phone ? `Phone: ${form.phone}\n` : '') +
-            `\nMessage:\n${form.message}`
-        );
-        window.open(
-            `https://wa.me/${site.whatsappNumber}?text=${waText}`,
-            '_blank'
-        );
+        window.open(waHref, '_blank', 'noopener,noreferrer');
         setTimeout(() => {
             setSending(false);
             setDone(true);
@@ -70,7 +74,7 @@ function ContactInner() {
             />
 
             <section className="max-w-6xl mx-auto px-4 py-20 grid md:grid-cols-2 gap-10">
-                {/* Contact Details */}
+                {/* Contact details */}
                 <div className="space-y-6">
                     <h2 className="text-2xl font-bold">Contact Details</h2>
 
@@ -105,29 +109,46 @@ function ContactInner() {
                         <FaWhatsapp /> Chat on WhatsApp
                     </a>
 
-                    {/* Extra: quick copy tips */}
                     <p className="text-xs text-gray-500 pt-3 border-t border-white/10">
-                        Email opens Gmail in a new tab. Use the copy button next to the
-                        address to paste it into any email app.
+                        Click the email address to open your email app. Use the copy button
+                        to paste it into any email service.
                     </p>
                 </div>
 
                 {/* Contact form */}
                 <div className="glass rounded-2xl p-8">
                     {done ? (
-                        <div className="text-center py-10">
+                        <div className="text-center py-8">
                             <div className="text-5xl mb-4">📩</div>
-                            <h3 className="text-xl font-bold mb-2">Message Sent!</h3>
+                            <h3 className="text-xl font-bold mb-2">Message Ready to Send!</h3>
                             <p className="text-gray-400 text-sm mb-6">
-                                We&apos;ll reply within 24 hours. If you&apos;d like an instant
-                                response, WhatsApp us directly.
+                                Choose your preferred delivery method below.
                             </p>
+
+                            <div className="flex flex-col gap-3">
+                                <a
+                                    href={waHref}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 px-5 py-3 rounded-lg font-bold transition"
+                                >
+                                    <FaWhatsapp /> Send via WhatsApp
+                                </a>
+                                <EmailButton
+                                    to={site.email}
+                                    subject={emailSubject}
+                                    body={emailBody}
+                                    label="Send via Email"
+                                    className="w-full"
+                                />
+                            </div>
+
                             <button
                                 onClick={() => {
                                     setForm({ name: '', email: '', phone: '', message: '' });
                                     setDone(false);
                                 }}
-                                className="text-xs text-amber-400 hover:text-amber-300 underline"
+                                className="mt-6 text-xs text-amber-400 hover:text-amber-300 underline"
                             >
                                 Send another message
                             </button>
@@ -164,9 +185,7 @@ function ContactInner() {
                                 rows={5}
                                 placeholder="Your message"
                                 value={form.message}
-                                onChange={(e) =>
-                                    setForm({ ...form, message: e.target.value })
-                                }
+                                onChange={(e) => setForm({ ...form, message: e.target.value })}
                                 className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-amber-500 resize-none"
                             />
                             <button
@@ -175,7 +194,7 @@ function ContactInner() {
                                 className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 px-4 py-3 rounded-lg font-bold transition"
                             >
                                 <FaPaperPlane size={14} />
-                                {sending ? 'Sending…' : 'Send Message'}
+                                {sending ? 'Preparing…' : 'Send Message'}
                             </button>
                             <p className="text-[10px] text-center text-gray-500">
                                 We&apos;ll never share your details.

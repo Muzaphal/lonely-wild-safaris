@@ -1,15 +1,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-    FaFacebookF,
-    FaInstagram,
-    FaTwitter,
-    FaPhoneAlt,
-} from 'react-icons/fa';
+import { FaFacebookF, FaInstagram, FaTwitter, FaPhoneAlt } from 'react-icons/fa';
 import CopyEmail from './CopyEmail';
 import { site } from '@/data/site';
 
-// Cache the year so Next.js doesn't treat it as an unstable value
 async function getCurrentYear() {
     'use cache';
     return new Date().getFullYear();
@@ -21,7 +15,6 @@ export default async function Footer() {
     return (
         <footer className="border-t border-white/10 bg-black/50 mt-20">
             <div className="max-w-7xl mx-auto px-4 py-14 grid grid-cols-1 md:grid-cols-4 gap-10">
-                {/* Brand */}
                 <div>
                     <Link
                         href="/"
@@ -53,74 +46,29 @@ export default async function Footer() {
                     </div>
                 </div>
 
-                {/* Explore */}
                 <div>
-                    <h4 className="font-bold mb-4 uppercase text-sm tracking-wider">
-                        Explore
-                    </h4>
+                    <h4 className="font-bold mb-4 uppercase text-sm tracking-wider">Explore</h4>
                     <ul className="space-y-2 text-sm text-gray-400">
-                        <li>
-                            <Link href="/uganda-safaris" className="hover:text-amber-500">
-                                Uganda Safaris
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/outbound-travel" className="hover:text-amber-500">
-                                Outbound Travel
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/air-ticket" className="hover:text-amber-500">
-                                Air Ticket Enquiry
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/about" className="hover:text-amber-500">
-                                About Us
-                            </Link>
-                        </li>
+                        <li><Link href="/uganda-safaris" className="hover:text-amber-500">Uganda Safaris</Link></li>
+                        <li><Link href="/outbound-travel" className="hover:text-amber-500">Outbound Travel</Link></li>
+                        <li><Link href="/air-ticket" className="hover:text-amber-500">Air Ticket Enquiry</Link></li>
+                        <li><Link href="/about" className="hover:text-amber-500">About Us</Link></li>
                     </ul>
                 </div>
 
-                {/* Support */}
                 <div>
-                    <h4 className="font-bold mb-4 uppercase text-sm tracking-wider">
-                        Support
-                    </h4>
+                    <h4 className="font-bold mb-4 uppercase text-sm tracking-wider">Support</h4>
                     <ul className="space-y-2 text-sm text-gray-400">
-                        <li>
-                            <Link href="/contact" className="hover:text-amber-500">
-                                Contact Us
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/booking" className="hover:text-amber-500">
-                                Book a Safari
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/faqs" className="hover:text-amber-500">
-                                FAQs
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/privacy" className="hover:text-amber-500">
-                                Privacy Policy
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/terms" className="hover:text-amber-500">
-                                Terms
-                            </Link>
-                        </li>
+                        <li><Link href="/contact" className="hover:text-amber-500">Contact Us</Link></li>
+                        <li><Link href="/booking" className="hover:text-amber-500">Book a Safari</Link></li>
+                        <li><Link href="/faqs" className="hover:text-amber-500">FAQs</Link></li>
+                        <li><Link href="/privacy" className="hover:text-amber-500">Privacy Policy</Link></li>
+                        <li><Link href="/terms" className="hover:text-amber-500">Terms</Link></li>
                     </ul>
                 </div>
 
-                {/* Contact */}
                 <div>
-                    <h4 className="font-bold mb-4 uppercase text-sm tracking-wider">
-                        Get in Touch
-                    </h4>
+                    <h4 className="font-bold mb-4 uppercase text-sm tracking-wider">Get in Touch</h4>
                     <ul className="space-y-3 text-sm text-gray-400">
                         <li className="flex items-center gap-2">
                             <FaPhoneAlt className="text-amber-500 shrink-0" />

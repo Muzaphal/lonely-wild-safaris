@@ -25,6 +25,8 @@ export default function EmailButton({
     // Detect mobile only after mounting to avoid hydration mismatch
     useEffect(() => {
         const checkMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        console.log("Is Mobile?", checkMobile);
+        console.log("User Agent:", navigator.userAgent);
         setIsMobile(checkMobile);
         setMounted(true);
     }, []);

@@ -9,56 +9,39 @@ interface EmailButtonProps {
     body: string;
     label?: string;
     className?: string;
-    /** Which delivery method to prefer. Defaults to 'auto'. */
-    method?: 'auto' | 'gmail' | 'mailto';
 }
 
-/**
- * Device-aware email button.
- * - On mobile: uses `mailto:` → opens the OS app chooser (Gmail/Outlook/Apple Mail)
- * - On desktop: uses Gmail web compose (works without any local email client)
- * - Always provides a Copy fallback if the click doesn't produce a visible window
- */
 export default function EmailButton({
     to,
     subject,
     body,
     label = 'Send via Email',
     className = '',
-    method = 'auto',
 }: EmailButtonProps) {
     const [copied, setCopied] = useState(false);
 
-    const isMobile = () => {
-        if (typeof navigator === 'undefined') return false;
-        return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    };
-
     const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-        // Pick target based on device (unless an explicit method was passed)
-        let target: 'mailto' | 'gmail' = 'gmail';
-        if (method === 'mailto') target = 'mailto';
-        else if (method === 'gmail') target = 'gmail';
-        else target = isMobile() ? 'mailto' : 'gmail';
+        e.preventDefault();
 
-        if (target === 'mailto') {
-            // Let the browser handle it natively — this is the only way mobile
-            // OSes will surface an app chooser.
+        // Simple mobile detection
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // FORCE mailto on mobile. This is the ONLY way to open the app chooser.
+            // Do NOT fall back to the Gmail web link here.
             const mailto =
                 `mailto:${to}` +
                 `?subject=${encodeURIComponent(subject)}` +
                 `&body=${encodeURIComponent(body)}`;
             window.location.href = mailto;
-            e.preventDefault();
         } else {
-            // Gmail web compose — reliable on desktop
+            // Desktop: Use Gmail web compose (works reliably here)
             const gmail =
                 `https://mail.google.com/mail/?view=cm&fs=1` +
                 `&to=${encodeURIComponent(to)}` +
                 `&su=${encodeURIComponent(subject)}` +
                 `&body=${encodeURIComponent(body)}`;
             window.open(gmail, '_blank', 'noopener,noreferrer');
-            e.preventDefault();
         }
     };
 

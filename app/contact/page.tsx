@@ -4,12 +4,12 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageHero from '@/components/PageHero';
 import CopyEmail from '@/components/CopyEmail';
-import EmailButton from '@/components/EmailButton';
 import {
     FaPhoneAlt,
     FaMapMarkerAlt,
     FaWhatsapp,
     FaPaperPlane,
+    FaCheck,
 } from 'react-icons/fa';
 import { site } from '@/data/site';
 
@@ -57,12 +57,25 @@ function ContactInner() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setSending(true);
-        // Open WhatsApp immediately so the message isn't lost
-        window.open(waHref, '_blank', 'noopener,noreferrer');
+
+        // Detect mobile
+        const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            // On mobile, use mailto to trigger the native app chooser
+            const mailto = `mailto:${site.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            window.location.href = mailto;
+        } else {
+            // On desktop, open Gmail web compose
+            const gmail = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(site.email)}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+            window.open(gmail, '_blank', 'noopener,noreferrer');
+        }
+
+        // Show a success screen after a brief delay
         setTimeout(() => {
             setSending(false);
             setDone(true);
-        }, 600);
+        }, 1000);
     };
 
     return (
@@ -119,28 +132,31 @@ function ContactInner() {
                 <div className="glass rounded-2xl p-8">
                     {done ? (
                         <div className="text-center py-8">
-                            <div className="text-5xl mb-4">📩</div>
-                            <h3 className="text-xl font-bold mb-2">Message Ready to Send!</h3>
+                            <div className="w-16 h-16 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <FaCheck size={24} />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">Email App Opened!</h3>
                             <p className="text-gray-400 text-sm mb-6">
-                                Choose your preferred delivery method below.
+                                Please hit <strong>Send</strong> in your email app to complete your message.
+                                (If nothing opened, use the buttons below).
                             </p>
 
                             <div className="flex flex-col gap-3">
+                                {/* Fallback buttons in case the email app didn't open */}
+                                <a
+                                    href={`mailto:${site.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`}
+                                    className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-5 py-3 rounded-lg font-bold transition w-full"
+                                >
+                                    <FaPaperPlane /> Try Email Again
+                                </a>
                                 <a
                                     href={waHref}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 px-5 py-3 rounded-lg font-bold transition"
+                                    className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 px-5 py-3 rounded-lg font-bold transition w-full"
                                 >
-                                    <FaWhatsapp /> Send via WhatsApp
+                                    <FaWhatsapp /> Send via WhatsApp instead
                                 </a>
-                                <EmailButton
-                                    to={site.email}
-                                    subject={emailSubject}
-                                    body={emailBody}
-                                    label="Send via Email"
-                                    className="w-full"
-                                />
                             </div>
 
                             <button
@@ -194,10 +210,10 @@ function ContactInner() {
                                 className="w-full flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-60 px-4 py-3 rounded-lg font-bold transition"
                             >
                                 <FaPaperPlane size={14} />
-                                {sending ? 'Preparing…' : 'Send Message'}
+                                {sending ? 'Opening Email…' : 'Send Message'}
                             </button>
                             <p className="text-[10px] text-center text-gray-500">
-                                We&apos;ll never share your details.
+                                This will open your email app with the message pre-filled.
                             </p>
                         </form>
                     )}

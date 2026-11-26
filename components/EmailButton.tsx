@@ -22,11 +22,8 @@ export default function EmailButton({
     const [isMobile, setIsMobile] = useState(false);
     const [mounted, setMounted] = useState(false);
 
-    // Detect mobile only after mounting to avoid hydration mismatch
     useEffect(() => {
         const checkMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-        console.log("Is Mobile?", checkMobile);
-        console.log("User Agent:", navigator.userAgent);
         setIsMobile(checkMobile);
         setMounted(true);
     }, []);
@@ -47,7 +44,6 @@ export default function EmailButton({
             e.preventDefault();
             window.open(gmailLink, '_blank', 'noopener,noreferrer');
         }
-        // On mobile, we do NOTHING here. We let the native <a href="mailto:"> take over.
     };
 
     const copyAll = async () => {
@@ -67,26 +63,20 @@ export default function EmailButton({
     };
 
     return (
-        <div className="inline-flex flex-col items-center gap-1">
-            {/* 
-        We use a real <a> tag. 
-        If mobile: href is "mailto:..." (OS intercepts this perfectly).
-        If desktop: href is Gmail link, but we intercept the click to open in a new tab.
-      */}
+        <div className={`relative ${className}`}>
             <a
                 href={mounted && isMobile ? mailtoLink : gmailLink}
                 target={mounted && isMobile ? '_self' : '_blank'}
                 rel="noopener noreferrer"
                 onClick={handleDesktopClick}
-                className={`inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg font-bold transition ${className}`}
+                className="flex items-center justify-center gap-2 w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-lg font-bold transition"
             >
                 <FaEnvelope /> {label}
             </a>
-
             <button
                 type="button"
                 onClick={copyAll}
-                className="text-[10px] text-gray-400 hover:text-amber-400 inline-flex items-center gap-1 transition"
+                className="absolute left-1/2 -translate-x-1/2 -bottom-5 text-[10px] text-gray-400 hover:text-amber-400 inline-flex items-center gap-1 transition"
             >
                 {copied ? (
                     <>

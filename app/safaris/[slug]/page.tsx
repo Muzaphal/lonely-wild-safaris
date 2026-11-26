@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fa';
 import { getSafariBySlug, safaris } from '@/data/safaris';
 import { site } from '@/data/site';
-import SafariPaymentButton from '@/components/SafariPaymentButton';
+import EmailButton from '@/components/EmailButton';
 
 // Pre-build every safari page at build time
 export async function generateStaticParams() {
@@ -354,17 +354,24 @@ async function SafariDetails({
                         </p>
                         <p className="text-xs text-gray-400 mb-6">per person</p>
 
-                        <div className="space-y-3">
+                        <div className="space-y-5">
                             <Link
                                 href={`/booking?safari=${safari.slug}`}
                                 className="flex items-center justify-center gap-2 w-full bg-amber-600 hover:bg-amber-700 px-4 py-3 rounded-lg font-bold transition"
                             >
                                 Book This Safari <FaChevronRight size={12} />
                             </Link>
-                            <SafariPaymentButton
-                                price={safari.price}
-                                title={safari.title}
-                            />
+
+                            <div className="w-full pb-4">
+                                <EmailButton
+                                    to={site.email}
+                                    subject={`Booking Enquiry: ${safari.title}`}
+                                    body={`Hello Lonely Wild Safaris,\n\nI am interested in booking the "${safari.title}" safari.\n\nPlease send me more information regarding availability and payment.\n\nThank you.`}
+                                    label="Ask via Email"
+                                    className="w-full"
+                                />
+                            </div>
+
                             <a
                                 href={waHref}
                                 target="_blank"

@@ -711,8 +711,7 @@ export default function PlanTripPage() {
                         ) : (
                             <button
                                 type="submit"
-                                disabled={!canProceed()}
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-bold transition"
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 px-6 py-3 rounded-lg font-bold transition"
                             >
                                 Submit Enquiry <FaPaperPlane size={12} />
                             </button>

@@ -26,7 +26,7 @@ import ChatPrompt from '@/components/ChatPrompt';
 const heroSlides = [
   { src: '/images/hero/hero-home.jpg', alt: 'Elephants at sunset on the African savanna' },
   { src: '/images/hero/hero-2.jpg', alt: 'Mountain gorilla in Bwindi Impenetrable Forest' },
-  { src: '/images/hero/hero-3.jpg', alt: 'Lion pride resting in Queen Elizabeth National Park' },
+  { src: '/images/hero/hero-3.avif', alt: 'Lion pride resting in Queen Elizabeth National Park' },
   { src: '/images/hero/hero-4.jpg', alt: 'Boat cruise on the Nile near Murchison Falls' },
 ];
 
